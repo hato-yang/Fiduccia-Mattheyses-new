@@ -203,6 +203,8 @@ void initialize_partition(struct partition *partition, int max_nets, int which_p
 	struct dll **GAIN_array = calloc(2 * max_nets, sizeof(struct dll *));
 	partition->GAIN_array = GAIN_array;
 	partition->GAIN_array_size = 2 * max_nets;
+	printf("max_nets(initialize_partition):%d\n", max_nets);
+	printf("GAIN_array_size:%d\n", partition->GAIN_array_size);
 	int i;
 	struct dll *list_of_cells_with_same_gain;
 	for (i = 0; i < 2 * max_nets; i++)

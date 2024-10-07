@@ -54,8 +54,9 @@ void import_data_and_run_algorithm(char *are_filename, char *netD_filename)
 
 		information->FM_chromosome = malloc(sizeof(struct chromosome));
 		initialize_chromosome(information->FM_chromosome, information);
-
+		printf("%d, %d\n", information->tolerance, information->tolerance1);
 		// Run the algorithm
+		// printf("%d, %d\n", information->partition_A->total_partition_area, information->partition_B->total_partition_area);
 		fiduccia_mattheyses_algorithm(information);
 
 		if (information->lowest_cutstate < lowest_global_cutsize)
@@ -64,6 +65,7 @@ void import_data_and_run_algorithm(char *are_filename, char *netD_filename)
 		// Some information needs to be freed between repeats
 		free(information->access_);
 	}
+
 	printf("Lowest cutstate achieved: %d\n", information->lowest_cutstate);
 	clock_t end = clock();
 	double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
@@ -90,6 +92,7 @@ int main()
 		printf("######################################################\n");
 		printf("Conclusion of demo. To disable, access include/main.h\n");
 		printf("######################################################\n");
+
 		return 0;
 	}
 

@@ -47,7 +47,19 @@ void segregate_cells_randomly(struct condensed *information)
 				partition_placement = information->FM_chromosome->gene_array[i];
 			}
 			else
-				partition_placement = ((rand() % (int)(1.0 / (information->ratio))) == 0);
+			{
+				// partition_placement = ((rand() % (int)(1.0 / (information->ratio))) == 0); // 原始隨機分配cell方法
+				//   根據當前分區面積動態決定分配到哪個分區
+				if (total_partition_areas[PARTITION_A] < total_partition_areas[PARTITION_B])
+				{
+					partition_placement = PARTITION_A;
+				}
+				else
+				{
+					partition_placement = PARTITION_B;
+				}
+			}
+			//	partition_placement = ((rand() % (int)(1.0 / (information->ratio))) == 0);//原始隨機分配cell方法
 
 			// total_partition_areas[partition_placement] += CELL_array[i]->area; // 原始代入面積寫法
 			////////////////
@@ -74,10 +86,11 @@ void segregate_cells_randomly(struct condensed *information)
 		}
 		/*int*/ long two_partition_area = 0;														  // 初始總面積計算
 		two_partition_area = total_partition_areas[PARTITION_A] + total_partition_areas[PARTITION_B]; // 初始總面積計算
-		printf("%ld   %ld   %ld   %ld   %d\n", total_partition_areas[PARTITION_A], total_partition_areas[PARTITION_B], two_partition_area, two_partition_area / 2, information->tolerance);
+		printf("%ld   %ld   %ld   %ld\n", total_partition_areas[PARTITION_A], total_partition_areas[PARTITION_B], two_partition_area, two_partition_area / 2);
 		// If the partition is within tolerance, break the loop and save to partition structs
 		// Otherwise free dlls and try again.
 		if (total_partition_areas[PARTITION_A] < ((two_partition_area / 2) /*information->desired_area*/ + information->tolerance) && total_partition_areas[PARTITION_A] > ((two_partition_area / 2) /*information->desired_area*/ - information->tolerance))
+		// if (total_partition_areas[PARTITION_A] < 2838171970 && total_partition_areas[PARTITION_B] < 2838171970)//兩邊面積皆小於Die size
 		{
 			break;
 		} // 原始代入面積寫法  information->desired_area 修改成 two_partition_area/2

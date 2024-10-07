@@ -72,7 +72,7 @@
 // Cutoff can be turned on without repeats, but repeats shouldn't be turned on without cutoff
 
 // Does the algorithm stop after the cutstate starts to increase again?
-#define FM_CUTOFF YES
+#define FM_CUTOFF NO
 
 // At what point does the algorithm stop?
 // Keep in mind that 0 allows no movement for the algorithm to get out of local minima

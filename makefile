@@ -3,7 +3,7 @@
 ##############################################################
 all: src/main.o src/dll_structure.o src/basic_objects.o src/populate_partitions.o src/data_input.o src/fiduccia_mattheyses.o src/genetic_algorithm.o
 	gcc -O3 -o src/GAmain.out src/main.o src/dll_structure.o src/basic_objects.o src/populate_partitions.o src/data_input.o src/fiduccia_mattheyses.o src/genetic_algorithm.o
-	rm src/*.o
+#	rm src/*.o
 
 
 run: all

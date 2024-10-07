@@ -53,6 +53,7 @@ int count_cells_in_are_file(char *are_filename)
 		}
 	}
 	fclose(fp);
+	printf("intput %d\n", counter);
 	return counter;
 }
 
@@ -89,7 +90,7 @@ struct are_metadata *read_in_are_file(struct cell **CELL_array, char *are_filena
 			int cell_area2 = atoi(token); // 空一格找第二面積*/
 			eachcell[0][i] = cell_area;	  ////用output輸出
 			eachcell[1][i] = cell_area2;
-			printf("a%d      %4d      %d\n", i + 1, eachcell[0][i], eachcell[1][i]);
+			// printf("a%d      %4d      %d\n", i + 1, eachcell[0][i], eachcell[1][i]);
 			////////////////
 			// Add cell area to total_area
 			total_area += cell_area;
