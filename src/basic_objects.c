@@ -200,14 +200,15 @@ int calculate_max_nets_on_cell(struct cell **CELL_array, int CELL_array_size)
 void initialize_partition(struct partition *partition, int max_nets, int which_partition)
 {
 	// Create main gain array, Gain from [-n, n)
-	struct dll **GAIN_array = calloc(2 * max_nets, sizeof(struct dll *));
+	int k = 2;																  ///////gain擴大2倍
+	struct dll **GAIN_array = calloc(2 * k * max_nets, sizeof(struct dll *)); // 2 * max_nets, 修改成 2 * k *  max_nets,
 	partition->GAIN_array = GAIN_array;
-	partition->GAIN_array_size = 2 * max_nets;
+	partition->GAIN_array_size = 2 * k * max_nets; // 2 * max_nets, 修改成 2 * k *  max_nets,
 	printf("max_nets(initialize_partition):%d\n", max_nets);
 	printf("GAIN_array_size:%d\n", partition->GAIN_array_size);
 	int i;
 	struct dll *list_of_cells_with_same_gain;
-	for (i = 0; i < 2 * max_nets; i++)
+	for (i = 0; i < 2 * k * max_nets; i++) // 2 * max_nets, 修改成 2 * k *  max_nets
 	{
 		list_of_cells_with_same_gain = malloc(sizeof(struct dll));
 		initialize_dll(list_of_cells_with_same_gain);

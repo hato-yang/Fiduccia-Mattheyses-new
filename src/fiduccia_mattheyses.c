@@ -110,7 +110,7 @@ void print_gain_arrays(struct partition *partition)
 void calculate_initial_gains_wrapper(struct condensed *information)
 {
 	calculate_initial_gains(information->partition_A, PARTITION_A, information->max_nets, information->FM_chromosome);
-	printf("middle of cal.....\n"); ////////////////////////////
+	// printf("middle of cal.....\n"); ////////////////////////////
 	calculate_initial_gains(information->partition_B, PARTITION_B, information->max_nets, information->FM_chromosome);
 }
 
@@ -127,25 +127,35 @@ void calculate_initial_gains(struct partition *partition, partition_type label, 
 	int cell_placement;
 	struct dll **GAIN_array = partition->GAIN_array;
 	struct dll *cell_gain_dll;
-	printf("in the cal.....\n"); /////////////////////////
+	// printf("in the cal.....\n"); /////////////////////////
 	// Access the first node in the partition with cell data
 	temp_cell_node = partition->cells_in_partition->head->next;
-	printf("temp_cell_node sucess.....\n"); /////////////////////////
+	// printf("temp_cell_node sucess.....\n"); /////////////////////////
 	// Go through each cell, calculate gain, add to correct place in GAIN_array
 	while (temp_cell_node != partition->cells_in_partition->tail)
 	{
-		printf("in the loop1.....\n"); /////////////////////////
+//////////////
+// if (temp_cell_node == NULL) {
+// printf("Error: temp_net_node is NULL.\n");
+// }
+//////////////
+		// printf("in the loop1.....\n"); /////////////////////////
 		temp_cell = (struct cell *)(temp_cell_node->data_structure);
-		printf("temp_cell sucess.....\n"); /////////////////////////
+		// printf("temp_cell sucess.....\n"); /////////////////////////
 		temp_netlist = temp_cell->nets;
-		printf("temp_netlist sucess.....\n"); /////////////////////////
+		// printf("temp_netlist sucess.....\n"); /////////////////////////
 		temp_net_node = ((struct node *)(temp_netlist->head))->next;
-		printf("temp_net_node sucess.....\n"); /////////////////////////
+		// printf("temp_net_node sucess.....\n"); /////////////////////////
 		while (temp_net_node != temp_netlist->tail)
 		{
-			printf("in the loop2.....\n"); /////////////////////////
+//////////////
+// if (temp_net_node == NULL) {
+// printf("Error: temp_net_node is NULL.\n");
+// }
+//////////////
+			// printf("in the loop2.....\n"); /////////////////////////
 			temp_net = temp_net_node->data_structure;
-			printf("temp_net sucess.....\n"); /////////////////////////
+			// printf("temp_net sucess.....\n"); /////////////////////////
 			// Check if the cell is on a critical net, change gain on whether it would be good/bad to move cell
 			if (temp_net->num_cells_in_[label] == 1)
 			{
@@ -156,18 +166,22 @@ void calculate_initial_gains(struct partition *partition, partition_type label, 
 				temp_cell->gain -= 1;
 			}
 			temp_net_node = temp_net_node->next;
-			printf("temp_net_node sucess.....\n"); /////////////////////////
-			printf("#loop2 %d\n", loop);		   /////////////////////////
-			loop++;								   ///////////////////////////////////
+			// printf("temp_net_node sucess.....\n"); /////////////////////////
+			// printf("#loop2 %d\n", loop);		   /////////////////////////
+			// loop++;								   ///////////////////////////////////
 		}
 		// Now that initial gain has been calculated, add to the appropriate dll in GAIN_array
-		cell_placement = max_nets + temp_cell->gain;
+		cell_placement = 2 * max_nets + temp_cell->gain; // max_nets改成2*max_nets
+		// printf("cell_placement sucess.....\n"); /////////////////////////
 		cell_gain_dll = GAIN_array[cell_placement];
+		// printf("cell_gain_dll sucess.....\n"); /////////////////////////
 		temp_cell->GAIN_array_node = insert_node(cell_gain_dll, 0, temp_cell);
+		// printf("temp_cell sucess.....\n"); /////////////////////////
 		temp_cell_node = temp_cell_node->next;
+		// printf("temp_cell_node sucess.....\n"); /////////////////////////
 	}
-	printf("here loop1 end\n");	   ///////////////////////////
-	printf("here function end\n"); /////////////////////////
+	// printf("here loop1 end\n");	   ///////////////////////////
+	// printf("here function end\n"); /////////////////////////
 	// Set max_gain for partition
 	update_max_gain_pointer(partition);
 }
@@ -178,7 +192,7 @@ void update_max_gain_pointer(struct partition *partition)
 	int i;
 	int no_pointer_change = 1;
 	struct dll *temp_gain_list;
-	printf("update_max_gain_pointer enter\n"); //////////////////////////////
+	// printf("update_max_gain_pointer enter\n"); //////////////////////////////
 	// Go through the highest gains first, check dll sizes until the first nonzero gain list
 	for (i = (partition->GAIN_array_size - 1); i >= 0; i--)
 	{
@@ -199,7 +213,7 @@ void update_max_gain_pointer(struct partition *partition)
 	{
 		partition->max_gain_pointer = NULL;
 	}
-	printf("update_max_gain_pointer leave\n"); //////////////////////////////////
+	// printf("update_max_gain_pointer leave\n"); //////////////////////////////////
 }
 
 // #####################################################################################################
@@ -369,80 +383,80 @@ int FM_pass(struct condensed *information)
 	// 	fprintf(shmetisInput, "cut: %d  Round:%d\n", new_cutsize, round); /////////////寫入Output
 	// }
 	round_num++; ////圈數加1
-	printf("cell   partition   area    !area    gain\n");
-	long total_area_in_partition_A = 0; /////////////
-	long total_area_in_partition_B = 0; /////////////
-	long total_area_in_partition_C = 0; /////////////
-	long total_area_in_partition_D = 0; /////////////
-	int area;
-	int area2;
-	int area3;
-	int area4;
-	// printf("partition %d 's Cell ID: \n", information->partition_A->which_partition);
-	struct node *current_node = information->partition_A->cells_in_partition->head->next;
-	while (current_node != information->partition_A->cells_in_partition->tail)
-	{
-		// ///////
-		// area = 0;
-		// area2 = 0;
-		// area3 = 0;
-		// area4 = 0;
-		// ///////
-		struct cell *cell = (struct cell *)current_node->data_structure;
-		// if (cell->which_partition == 0)
-		// {
-		// 	area = cell->area;
-		// 	area3 = cell->area2;
-		// }
-		// else
-		// {
-		// 	area2 = cell->area2;
-		// 	area4 = cell->area;
-		// }
-		printf("%d      %d           %4d    %4d    %2d\n", cell->identifier + 1, cell->which_partition, cell->area, cell->area2, cell->gain); //
-		// total_area_in_partition_A = total_area_in_partition_A + area;
-		// total_area_in_partition_C = total_area_in_partition_C + area3;
-		// total_area_in_partition_B = total_area_in_partition_B + area2;
-		// total_area_in_partition_D = total_area_in_partition_D + area4;
-		if (new_cutsize <= information->lowest_cutstate)
-		{
-			// fprintf(shmetisInput, "a%d      %d \n", cell->identifier + 1, cell->which_partition); //////////寫入Output           暫時註解掉
-		}
-		//}
-		current_node = current_node->next;
-	}
-	struct node *current_node1 = information->partition_B->cells_in_partition->head->next;
-	while (current_node1 != information->partition_B->cells_in_partition->tail)
-	{
-		// ///////
-		// area = 0;
-		// area2 = 0;
-		// area3 = 0;
-		// area4 = 0;
-		// ///////
-		struct cell *cell2 = (struct cell *)current_node1->data_structure;
-		// if (cell2->which_partition == 1)
-		// {
-		// 	area2 = cell2->area2;
-		// 	area4 = cell2->area;
-		// }
-		// else
-		// {
-		// 	area = cell2->area;
-		// 	area3 = cell2->area2;
-		// }
-		printf("%d      %d           %4d    %4d    %2d\n", cell2->identifier + 1, cell2->which_partition, cell2->area, cell2->area2, cell2->gain); //
-		// total_area_in_partition_A = total_area_in_partition_A + area;
-		// total_area_in_partition_C = total_area_in_partition_C + area3;
-		// total_area_in_partition_B = total_area_in_partition_B + area2;
-		// total_area_in_partition_D = total_area_in_partition_D + area4;
-		if (new_cutsize <= information->lowest_cutstate)
-		{
-			// fprintf(shmetisInput, "a%d      %d \n", cell2->identifier + 1, cell2->which_partition); //////////寫入Output             暫時註解掉
-		}
-		//}
-		current_node1 = current_node1->next;
-	}
+	// printf("cell   partition   area    !area    gain\n");
+	// long total_area_in_partition_A = 0; /////////////
+	// long total_area_in_partition_B = 0; /////////////
+	// long total_area_in_partition_C = 0; /////////////
+	// long total_area_in_partition_D = 0; /////////////
+	// int area;
+	// int area2;
+	// int area3;
+	// int area4;
+	// // printf("partition %d 's Cell ID: \n", information->partition_A->which_partition);
+	// struct node *current_node = information->partition_A->cells_in_partition->head->next;
+	// while (current_node != information->partition_A->cells_in_partition->tail)
+	// {
+	// 	// ///////
+	// 	// area = 0;
+	// 	// area2 = 0;
+	// 	// area3 = 0;
+	// 	// area4 = 0;
+	// 	// ///////
+	// 	struct cell *cell = (struct cell *)current_node->data_structure;
+	// 	// if (cell->which_partition == 0)
+	// 	// {
+	// 	// 	area = cell->area;
+	// 	// 	area3 = cell->area2;
+	// 	// }
+	// 	// else
+	// 	// {
+	// 	// 	area2 = cell->area2;
+	// 	// 	area4 = cell->area;
+	// 	// }
+	// 	printf("%d      %d           %4d    %4d    %2d\n", cell->identifier + 1, cell->which_partition, cell->area, cell->area2, cell->gain); //
+	// 	// total_area_in_partition_A = total_area_in_partition_A + area;
+	// 	// total_area_in_partition_C = total_area_in_partition_C + area3;
+	// 	// total_area_in_partition_B = total_area_in_partition_B + area2;
+	// 	// total_area_in_partition_D = total_area_in_partition_D + area4;
+	// 	if (new_cutsize <= information->lowest_cutstate)
+	// 	{
+	// 		// fprintf(shmetisInput, "a%d      %d \n", cell->identifier + 1, cell->which_partition); //////////寫入Output           暫時註解掉
+	// 	}
+	// 	//}
+	// 	current_node = current_node->next;
+	// }
+	// struct node *current_node1 = information->partition_B->cells_in_partition->head->next;
+	// while (current_node1 != information->partition_B->cells_in_partition->tail)
+	// {
+	// 	// ///////
+	// 	// area = 0;
+	// 	// area2 = 0;
+	// 	// area3 = 0;
+	// 	// area4 = 0;
+	// 	// ///////
+	// 	struct cell *cell2 = (struct cell *)current_node1->data_structure;
+	// 	// if (cell2->which_partition == 1)
+	// 	// {
+	// 	// 	area2 = cell2->area2;
+	// 	// 	area4 = cell2->area;
+	// 	// }
+	// 	// else
+	// 	// {
+	// 	// 	area = cell2->area;
+	// 	// 	area3 = cell2->area2;
+	// 	// }
+	// 	printf("%d      %d           %4d    %4d    %2d\n", cell2->identifier + 1, cell2->which_partition, cell2->area, cell2->area2, cell2->gain); //
+	// 	// total_area_in_partition_A = total_area_in_partition_A + area;
+	// 	// total_area_in_partition_C = total_area_in_partition_C + area3;
+	// 	// total_area_in_partition_B = total_area_in_partition_B + area2;
+	// 	// total_area_in_partition_D = total_area_in_partition_D + area4;
+	// 	if (new_cutsize <= information->lowest_cutstate)
+	// 	{
+	// 		// fprintf(shmetisInput, "a%d      %d \n", cell2->identifier + 1, cell2->which_partition); //////////寫入Output             暫時註解掉
+	// 	}
+	// 	//}
+	// 	current_node1 = current_node1->next;
+	// }
 	if (new_cutsize <= information->lowest_cutstate)
 	{
 		// fprintf(shmetisInput, "A: %4ld or %4ld\nB: %4ld or %4ld\n", total_area_in_partition_A, total_area_in_partition_C, total_area_in_partition_B, total_area_in_partition_D); //////////寫入Output       暫時註解掉

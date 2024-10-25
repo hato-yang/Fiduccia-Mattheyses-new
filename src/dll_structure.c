@@ -82,9 +82,10 @@ Inputs: list, position, data_structure
 			making this void* allows a generic data type in node
 Outputs: The node it created
 */
+
 struct node *insert_node(struct dll *list, int position, void *data_structure)
 {
-
+// printf("Inserting into list: %p\n", list);///////////
 	// reach correct position
 	int index = position;
 	struct node *placeholder = list->head;
