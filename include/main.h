@@ -77,7 +77,7 @@
 // At what point does the algorithm stop?
 // Keep in mind that 0 allows no movement for the algorithm to get out of local minima
 // Minimum 0, integer
-#define FM_CUTOFF_THRESHOLD 5
+#define FM_CUTOFF_THRESHOLD 2
 
 // Should never be turned on without cutoff also being on.
 // This is because the last pass is always the partition copied over
@@ -116,14 +116,24 @@ struct condensed
 	// The area of the largest cell is used as the balance tolerance
 	int tolerance;
 	int tolerance1; // 儲存第二製程最大面積
+	int tolerance_Macro;
+	int tolerance1_Macro; // 儲存第二製程最大面積
 	// The sum of all cell areas
-	int total_area;
+	long total_area;
+	long total_area2; // 第二製程總面積
+	long die_area;
+	int utilA;
+	int utilB;
 	int desired_area;
 	double ratio;
 	// The highest number of nets connected to a single cell
 	int max_nets;
 	// The smallest number of nets between partitions encountered during FM passes
 	int lowest_cutstate;
+	long final_area;
+	long final_area2; // 第二製程總面積
+	long initial_area;
+	long initial_area2; // 第二製程總面積
 	// The cutstate value during the current pass
 	int current_cutstate;
 	struct chromosome *FM_chromosome;

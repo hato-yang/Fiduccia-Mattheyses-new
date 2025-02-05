@@ -1,0 +1,14 @@
+Lowest cutstate achieved: 2, 2
+A : 618 , B : 789
+max_in_A : 140  Macro : 204 , max_in_B : 180  Macro : 324
+maxutil_A : 0.515000 , maxutil_B : 0.657500
+die_size : 1200 maxutil_area_A : 960.000000 , maxutil_area_B : 960.000000
+3      1            204     324
+6      1            204     324
+7      1            140     180
+8      1             70     105
+1      0             70     105
+2      0            204     324
+4      0            140     180
+5      0            140     180
+554,933

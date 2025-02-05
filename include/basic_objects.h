@@ -42,7 +42,7 @@ struct partition
 	struct dll **GAIN_array;
 	int GAIN_array_size;
 	struct dll *cells_in_partition;
-	long int total_partition_area;
+	long total_partition_area;
 };
 
 void initialize_integer(struct integer *, int);

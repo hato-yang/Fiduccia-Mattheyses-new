@@ -52,7 +52,7 @@ void add_net_to_cell(struct cell *cell, struct net *net)
 
 void print_cell(struct cell *cell)
 {
-	printf("%d ", cell->identifier + 1);
+	printf("%d", cell->identifier + 1);
 }
 
 // Consider deleting

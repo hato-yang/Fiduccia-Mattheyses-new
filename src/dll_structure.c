@@ -85,7 +85,7 @@ Outputs: The node it created
 
 struct node *insert_node(struct dll *list, int position, void *data_structure)
 {
-// printf("Inserting into list: %p\n", list);///////////
+	// printf("Inserting into list: %p\n", list);///////////
 	// reach correct position
 	int index = position;
 	struct node *placeholder = list->head;
@@ -184,14 +184,31 @@ struct node *remove_node(struct node *node_being_removed, struct dll *list)
 // Frees memory
 void garbage_collection_dll(struct dll *list, garbage_handler option)
 {
-
 	struct node *head = list->head;
+	struct node *temp = head->next;
+
+	// 使用迴圈釋放每個節點的記憶體
+	while (temp != list->tail)
+	{
+		struct node *next_node = temp->next;
+		if (option == DEALLOC_DATA && temp->data_structure != NULL)
+		{
+			free(temp->data_structure); // 釋放 data_structure
+		}
+		free(temp); // 釋放節點本身
+		temp = next_node;
+	}
+
+	// 最後釋放 head 和 list
+	free(head);
+	free(list);
+	/*struct node *head = list->head;
 
 	// Neither head nor tail have data_structures associated
 	// It's simpler to treat them separately
 	garbage_collection_dll_recursive(head->next, list->tail, option);
 	free(head);
-	free(list);
+	free(list);*/
 }
 
 // Input first(not head) and tail nodes of the ddl

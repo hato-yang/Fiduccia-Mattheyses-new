@@ -13,7 +13,13 @@ struct condensed *read_in_data_to_arrays(char *are_filename, char *netD_filename
 	struct are_metadata *are_output = read_in_are_file(CELL_array, are_filename);
 	int tolerance = are_output->tolerance;
 	int tolerance1 = are_output->tolerance1; // 儲存第二製程最大面積
-	int total_area = are_output->total_area;
+	int tolerance_Macro = are_output->tolerance_Macro;
+	int tolerance1_Macro = are_output->tolerance1_Macro; // 儲存第二製程最大面積
+	long total_area = are_output->total_area;
+	long total_area2 = are_output->total_area2;
+	int utilA = are_output->u_value1;
+	int utilB = are_output->u_value2;
+	long die_area = are_output->u_value3;
 	//  struct no longer needed, free
 	free(are_output);
 
@@ -32,8 +38,13 @@ struct condensed *read_in_data_to_arrays(char *are_filename, char *netD_filename
 	information->NET_array_size = number_of_nets;
 	information->tolerance = tolerance;
 	information->tolerance1 = tolerance1;
+	information->tolerance_Macro = tolerance_Macro;
+	information->tolerance1_Macro = tolerance1_Macro;
 	information->total_area = total_area;
-
+	information->total_area2 = total_area2;
+	information->utilA = utilA;
+	information->utilB = utilB;
+	information->die_area = die_area;
 	return information;
 }
 
@@ -67,13 +78,22 @@ struct are_metadata *read_in_are_file(struct cell **CELL_array, char *are_filena
 	// Each cell struct gets a unique identifier
 	int index = 0;
 	// Keep track of the largest cell, as it will be the tolerance for partitioning
-	int total_area = 0;
+	long total_area = 0;
+	long total_area2 = 0; ///////存第二製程面積
 	int largest_cell_area = 0;
 	int largest_cell_area1 = 0; // 尋找第二製程最大面積
+	int largest_cell_area_Macro = 0;
+	int largest_cell_area1_Macro = 0; // 尋找第二製程最大面積
 	struct cell *new_cell;
 	// loop through lines, malloc cells as they appear in the .are file
 	int i = 0;				  ////////////////////cell編號
 	int eachcell[2][1000000]; ////////////存面積
+							  //////////
+	// 假設只有一組 u 開頭的數據
+	int u_value1 = 0, u_value2 = 0; // 儲存單一組 u 數據
+	long u_value3 = 0;
+	int found_u = 0; // 標誌是否已經找到 u 數據
+	//////////
 	while (fgets(line, sizeof(line), fp))
 	{
 		//    a (for cell) / p (for pin)
@@ -88,23 +108,34 @@ struct are_metadata *read_in_are_file(struct cell **CELL_array, char *are_filena
 			////////////////
 			token = strtok(NULL, " ");	  // 空一格找第二面積
 			int cell_area2 = atoi(token); // 空一格找第二面積*/
+			token = strtok(NULL, " ");	  // 提取字母
+			char isMacro = token[0];	  // 提取字母
 			eachcell[0][i] = cell_area;	  ////用output輸出
 			eachcell[1][i] = cell_area2;
 			// printf("a%d      %4d      %d\n", i + 1, eachcell[0][i], eachcell[1][i]);
 			////////////////
 			// Add cell area to total_area
 			total_area += cell_area;
+			total_area2 += cell_area2;
 			// Set the index and area information
 			initialize_cell(new_cell, index, cell_area, cell_area2);
 			// Check for largest cell
-			if (cell_area > largest_cell_area)
+			if (cell_area > largest_cell_area && isMacro == 78)
 			{
 				largest_cell_area = cell_area;
 			}
+			if (cell_area > largest_cell_area && isMacro == 89)
+			{
+				largest_cell_area_Macro = cell_area;
+			}
 			///////////尋找第二製程最大面積
-			if (cell_area2 > largest_cell_area1)
+			if (cell_area2 > largest_cell_area1 && isMacro == 78)
 			{
 				largest_cell_area1 = cell_area2;
+			}
+			if (cell_area > largest_cell_area && isMacro == 89)
+			{
+				largest_cell_area1_Macro = cell_area2;
 			}
 			///////////
 			// Add to CELL_array
@@ -113,11 +144,29 @@ struct are_metadata *read_in_are_file(struct cell **CELL_array, char *are_filena
 			index++;
 			i = i + 1; ///////////////////////
 		}
+		else if (line[0] == 'u' && !found_u)
+		{
+			// 跳過 'u' 字符，並開始解析後面的數字
+			char *token = strtok(line + 1, " "); // 跳過 'u' 字符
+			// 提取數字部分，忽略非數字字符
+			u_value1 = strtol(token, NULL, 10);
+			token = strtok(NULL, " ");
+			u_value2 = strtol(token, NULL, 10);
+			token = strtok(NULL, " ");
+			u_value3 = strtol(token, NULL, 10);
+			found_u = 1;
+		}
 	}
 	fclose(fp);
 	output->tolerance = largest_cell_area;
 	output->tolerance1 = largest_cell_area1; // 儲存第二製程最大面積
+	output->tolerance_Macro = largest_cell_area_Macro;
+	output->tolerance1_Macro = largest_cell_area1_Macro; // 儲存第二製程最大面積
 	output->total_area = total_area;
+	output->total_area2 = total_area2;
+	output->u_value1 = u_value1;
+	output->u_value2 = u_value2;
+	output->u_value3 = u_value3;
 	return output;
 }
 

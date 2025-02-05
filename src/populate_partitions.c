@@ -15,7 +15,10 @@ void segregate_cells_randomly(struct condensed *information)
 
 	struct dll *list_of_cells_A;
 	struct dll *list_of_cells_B;
-
+	/////////////////計算分布機率
+	float x;
+	x = (float)information->total_area / (information->total_area + information->total_area2);
+	/////////////////
 	/*int*/ long total_partition_areas[2];
 	total_partition_areas[PARTITION_A] = 0;
 	total_partition_areas[PARTITION_B] = 0;
@@ -48,28 +51,31 @@ void segregate_cells_randomly(struct condensed *information)
 			}
 			else
 			{
-				// partition_placement = ((rand() % (int)(1.0 / (information->ratio))) == 0); // 原始隨機分配cell方法
-				//   根據當前分區面積動態決定分配到哪個分區
-				if (total_partition_areas[PARTITION_A] < total_partition_areas[PARTITION_B])
-				{
-					partition_placement = PARTITION_A;
-				}
-				else
-				{
-					partition_placement = PARTITION_B;
-				}
+				float random_value = (float)rand() / RAND_MAX; // 生成 0 到 1 的隨機數
+				partition_placement = (random_value < x);	   // 如果隨機數小於 x，則選擇 partition A
+															   //    根據當前分區面積動態決定分配到哪個分區
+															   // if (total_partition_areas[PARTITION_A] < total_partition_areas[PARTITION_B])
+															   // {
+															   // 	partition_placement = PARTITION_A;
+															   // }
+															   // else
+															   // {
+															   // 	partition_placement = PARTITION_B;
+															   // }
 			}
-			//	partition_placement = ((rand() % (int)(1.0 / (information->ratio))) == 0);//原始隨機分配cell方法
+			// partition_placement = ((rand() % (int)(1.0 / (information->ratio))) == 0); // 原始隨機分配cell方法
 
 			// total_partition_areas[partition_placement] += CELL_array[i]->area; // 原始代入面積寫法
 			////////////////
 			if (partition_placement == PARTITION_A)
 			{
 				total_partition_areas[partition_placement] += CELL_array[i]->area;
+				// printf("cell# : %d cellarea : %d total.A : %ld\n", i, CELL_array[i]->area, total_partition_areas[partition_placement]);
 			}
 			if (partition_placement == PARTITION_B)
 			{
 				total_partition_areas[partition_placement] += CELL_array[i]->area2;
+				// printf("cell# : %d cellarea : %d total.B : %ld\n", i, CELL_array[i]->area2, total_partition_areas[partition_placement]);
 			}
 			////////////////
 			CELL_array[i]->partition = information->access_[partition_placement];
@@ -89,12 +95,14 @@ void segregate_cells_randomly(struct condensed *information)
 		printf("%ld   %ld   %ld   %ld\n", total_partition_areas[PARTITION_A], total_partition_areas[PARTITION_B], two_partition_area, two_partition_area / 2);
 		// If the partition is within tolerance, break the loop and save to partition structs
 		// Otherwise free dlls and try again.
-		if (total_partition_areas[PARTITION_A] < ((two_partition_area / 2) /*information->desired_area*/ + information->tolerance) && total_partition_areas[PARTITION_A] > ((two_partition_area / 2) /*information->desired_area*/ - information->tolerance))
+		if (total_partition_areas[PARTITION_A] < ((two_partition_area / 2) + (information->tolerance_Macro * 3)) && total_partition_areas[PARTITION_A] > ((two_partition_area / 2) - (information->tolerance_Macro * 3)))
 		// if (total_partition_areas[PARTITION_A] < 2838171970 && total_partition_areas[PARTITION_B] < 2838171970)//兩邊面積皆小於Die size
 		{
+			information->initial_area = total_partition_areas[PARTITION_A];
+			information->initial_area2 = total_partition_areas[PARTITION_B];
 			break;
-		} // 原始代入面積寫法  information->desired_area 修改成 two_partition_area/2
-
+		}
+		// 原始代入面積寫法  information->desired_area 修改成 two_partition_area/2
 		// Get ready for next loop
 		garbage_collection_dll(list_of_cells_A, DO_NOT_DEALLOC_DATA);
 		garbage_collection_dll(list_of_cells_B, DO_NOT_DEALLOC_DATA);
@@ -109,7 +117,7 @@ void segregate_cells_randomly(struct condensed *information)
 }
 
 // Add cells, return dll of cutstate nets
-void copy_cells_into_partitions(struct partition *partition_A, struct partition *partition_B, struct dll *list_of_cells_A, struct dll *list_of_cells_B, int total_partition_area_A, int total_partition_area_B)
+void copy_cells_into_partitions(struct partition *partition_A, struct partition *partition_B, struct dll *list_of_cells_A, struct dll *list_of_cells_B, long total_partition_area_A, long total_partition_area_B)
 {
 
 	partition_A->total_partition_area = total_partition_area_A;

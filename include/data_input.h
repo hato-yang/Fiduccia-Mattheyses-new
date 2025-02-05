@@ -13,9 +13,17 @@ struct array_metadata
 
 struct are_metadata
 {
-	int total_area;
+	long total_area;
+	long total_area2;
+	long die_area;
 	int tolerance;
 	int tolerance1; // 儲存第二製程最大面積
+	int tolerance_Macro;
+	int tolerance1_Macro; // 儲存第二製程最大面積
+	// 新增 u 數據的欄位
+	int u_value1;
+	int u_value2;
+	long u_value3;
 };
 
 struct condensed *read_in_data_to_arrays(char *, char *);

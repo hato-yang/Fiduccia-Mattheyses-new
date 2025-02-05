@@ -13,7 +13,6 @@ void import_data_and_run_algorithm(char *are_filename, char *netD_filename)
 
 	// Obtain information from the two data files (are, netD)
 	struct condensed *information = read_in_data_to_arrays(are_filename, netD_filename);
-
 	// Add useful information about partition sizes
 	information->desired_area = (int)(RATIO * information->total_area);
 	information->ratio = RATIO;
@@ -23,6 +22,8 @@ void import_data_and_run_algorithm(char *are_filename, char *netD_filename)
 
 	int i;
 	int lowest_global_cutsize = 99999999;
+	long area_util = 0;	 // 存每輪最佳解
+	long area2_util = 0; // 存每輪最佳解
 	for (i = 0; i < FM_NUM_PASSES; i++)
 	{
 
@@ -37,7 +38,40 @@ void import_data_and_run_algorithm(char *are_filename, char *netD_filename)
 
 		// Separate the cells into one of the two partitions
 		populate_partitions(information);
-
+		////////////////////print cell output
+		/*
+		FILE *Output = fopen("Output_initial", "w");
+		fprintf(Output, "Lowest cutstate achieved: %d\n", information->lowest_cutstate);
+		fprintf(Output, "A : %ld , B : %ld\n", information->initial_area, information->initial_area2);
+		fprintf(Output, "max_in_A : %d , max_in_B : %d\n", information->tolerance, information->tolerance1);
+		double uA = (double)information->die_area * information->utilA / 100;
+		double uB = (double)information->die_area * information->utilA / 100;
+		fprintf(Output, "die_size : %ld maxutil_area_A : %f , maxutil_area_B : %f\n", information->die_area, uA, uB);
+		int area0;
+		int area1;
+		struct node *node0 = information->partition_A->cells_in_partition->head->next;
+		while (node0 != information->partition_A->cells_in_partition->tail)
+		{
+			struct cell *cell0 = (struct cell *)node0->data_structure;
+			area0 = 0;
+			if (cell0->which_partition == 0)
+				area0 = cell0->area;
+			fprintf(Output, "%d      %d           %4d    %4d\n", cell0->identifier + 1, cell0->which_partition, cell0->area, cell0->area2); //
+			node0 = node0->next;
+		}
+		struct node *node1 = information->partition_B->cells_in_partition->head->next;
+		while (node1 != information->partition_B->cells_in_partition->tail)
+		{
+			struct cell *cell1 = (struct cell *)node1->data_structure;
+			area1 = 0;
+			if (cell1->which_partition == 1)
+				area1 = cell1->area2;
+			fprintf(Output, "%d      %d           %4d    %4d\n", cell1->identifier + 1, cell1->which_partition, cell1->area, cell1->area2); //
+			node1 = node1->next;
+		}
+		fclose(Output);
+		*/
+		////////////////////
 		// Reset the partition information with new GA info if FM begins to climb
 		if ((information->FM_chromosome != NULL) && (information->FM_chromosome->cutstate > (lowest_global_cutsize + GA_TRIGGER)))
 		{
@@ -60,13 +94,98 @@ void import_data_and_run_algorithm(char *are_filename, char *netD_filename)
 		fiduccia_mattheyses_algorithm(information);
 
 		if (information->lowest_cutstate < lowest_global_cutsize)
+		{
 			lowest_global_cutsize = information->lowest_cutstate;
-
+			printf("lowest_global_cutsize : %d\n", lowest_global_cutsize);
+			/////////存入每輪最佳解面積
+			area_util = information->final_area;
+			area2_util = information->final_area2;
+			/////////
+			// ////////////////////print cell output
+			// FILE *Output = fopen("Output_true", "w");
+			// printf("Output_true 開\n");
+			// fprintf(Output, "Lowest cutstate achieved: %d, %d\n", information->lowest_cutstate, lowest_global_cutsize);
+			// fprintf(Output, "A : %ld , B : %ld\n", area_util, area2_util);
+			// fprintf(Output, "max_in_A : %d  Macro : %d , max_in_B : %d  Macro : %d\n", information->tolerance, information->tolerance_Macro, information->tolerance1, information->tolerance1_Macro);
+			// double uA = (double)information->die_area * information->utilA / 100;
+			// double uB = (double)information->die_area * information->utilA / 100;
+			// fprintf(Output, "maxutil_A : %f , maxutil_B : %f\n", (float)information->final_area / information->die_area, (float)information->final_area2 / information->die_area);
+			// fprintf(Output, "die_size : %ld maxutil_area_A : %f , maxutil_area_B : %f\n", information->die_area, uA, uB);
+			// long area0 = 0;
+			// long area1 = 0;
+			// struct node *node0 = information->partition_A->cells_in_partition->head->next;
+			// while (node0 != information->partition_A->cells_in_partition->tail)
+			// {
+			// 	struct cell *cell0 = (struct cell *)node0->data_structure;
+			// 	if (cell0->which_partition == 0)
+			// 		area0 += cell0->area;
+			// 	if (cell0->which_partition == 1)
+			// 		area1 += cell0->area2;
+			// 	fprintf(Output, "%d      %d           %4d    %4d\n", cell0->identifier + 1, cell0->which_partition, cell0->area, cell0->area2); //
+			// 	node0 = node0->next;
+			// }
+			// struct node *node1 = information->partition_B->cells_in_partition->head->next;
+			// while (node1 != information->partition_B->cells_in_partition->tail)
+			// {
+			// 	struct cell *cell1 = (struct cell *)node1->data_structure;
+			// 	if (cell1->which_partition == 1)
+			// 		area1 += cell1->area2;
+			// 	if (cell1->which_partition == 0)
+			// 		area0 += cell1->area;
+			// 	fprintf(Output, "%d      %d           %4d    %4d\n", cell1->identifier + 1, cell1->which_partition, cell1->area, cell1->area2); //
+			// 	node1 = node1->next;
+			// }
+			// fprintf(Output, "%ld,%ld", area0, area1);
+			// fclose(Output);
+			// printf("Output_true 關\n");
+			// ////////////////////
+		}
 		// Some information needs to be freed between repeats
 		free(information->access_);
 	}
 
-	printf("Lowest cutstate achieved: %d\n", information->lowest_cutstate);
+	printf("FM_NUM_PASSES: %d\n", FM_NUM_PASSES);
+	printf("Lowest cutstate achieved: %d, %d\n", information->lowest_cutstate, lowest_global_cutsize);
+	float A = (float)/*(information->final_area)*/ area_util / information->die_area;
+	float B = (float)/*(information->final_area2)*/ area2_util / information->die_area;
+	printf("A : %ld,%ld , B : %ld,%ld\n", area_util, information->final_area, area2_util, information->final_area2);
+	printf("maxutil_A : %f , maxutil_B : %f\n", A, B);
+	////////////////////print cell output
+	FILE *Output = fopen("Output", "w");
+	fprintf(Output, "Lowest cutstate achieved: %d, %d\n", information->lowest_cutstate, lowest_global_cutsize);
+	fprintf(Output, "A : %ld , B : %ld\n", area_util, area2_util);
+	fprintf(Output, "max_in_A : %d  Macro : %d , max_in_B : %d  Macro : %d\n", information->tolerance, information->tolerance_Macro, information->tolerance1, information->tolerance1_Macro);
+	double uA = (double)information->die_area * information->utilA / 100;
+	double uB = (double)information->die_area * information->utilA / 100;
+	fprintf(Output, "maxutil_A : %f , maxutil_B : %f\n", A, B);
+	fprintf(Output, "die_size : %ld maxutil_area_A : %f , maxutil_area_B : %f\n", information->die_area, uA, uB);
+	long area0 = 0;
+	long area1 = 0;
+	struct node *node0 = information->partition_A->cells_in_partition->head->next;
+	while (node0 != information->partition_A->cells_in_partition->tail)
+	{
+		struct cell *cell0 = (struct cell *)node0->data_structure;
+		if (cell0->which_partition == 0)
+			area0 += cell0->area;
+		if (cell0->which_partition == 1)
+			area1 += cell0->area2;
+		fprintf(Output, "%d      %d           %4d    %4d\n", cell0->identifier + 1, cell0->which_partition, cell0->area, cell0->area2); //
+		node0 = node0->next;
+	}
+	struct node *node1 = information->partition_B->cells_in_partition->head->next;
+	while (node1 != information->partition_B->cells_in_partition->tail)
+	{
+		struct cell *cell1 = (struct cell *)node1->data_structure;
+		if (cell1->which_partition == 1)
+			area1 += cell1->area2;
+		if (cell1->which_partition == 0)
+			area0 += cell1->area;
+		fprintf(Output, "%d      %d           %4d    %4d\n", cell1->identifier + 1, cell1->which_partition, cell1->area, cell1->area2); //
+		node1 = node1->next;
+	}
+	fprintf(Output, "%ld,%ld", area0, area1);
+	fclose(Output);
+	////////////////////
 	clock_t end = clock();
 	double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
 	if (PRINT_EXECUTION_TIME)
