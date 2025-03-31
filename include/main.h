@@ -15,8 +15,8 @@
 #define NO 0
 
 // Toy files
-#define TEST_ARE_FILENAME "data/testdata.are"
-#define TEST_NETD_FILENAME "data/testdata.netD"
+#define TEST_ARE_FILENAME "data/testdata3.are"
+#define TEST_NETD_FILENAME "data/testdata3.netD"
 
 //*************************************************************************
 //*******************      USER DEFINED OPTIONS    ************************
