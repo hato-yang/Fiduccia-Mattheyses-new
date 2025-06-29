@@ -20,6 +20,7 @@ struct condensed *read_in_data_to_arrays(char *are_filename, char *netD_filename
 	int utilA = are_output->u_value1;
 	int utilB = are_output->u_value2;
 	long die_area = are_output->u_value3;
+	int max_cell_count = 0;
 	//  struct no longer needed, free
 	free(are_output);
 
@@ -29,8 +30,8 @@ struct condensed *read_in_data_to_arrays(char *are_filename, char *netD_filename
 
 	// Create a record of the array sizes
 	struct condensed *information = malloc(sizeof(struct condensed));
-	information->total_pin_count = read_in_netD_file(CELL_array, NET_array, netD_filename);
-
+	information->total_pin_count = read_in_netD_file(CELL_array, NET_array, netD_filename, &max_cell_count);
+	information->max_cell_count = max_cell_count;
 	// Store the metadata information
 	information->CELL_array = CELL_array;
 	information->CELL_array_size = number_of_cells;
@@ -193,7 +194,7 @@ int count_nets_in_netD_file(char *netD_filename)
 	return counter;
 }
 
-int read_in_netD_file(struct cell **CELL_array, struct net **NET_array, char *netD_filename)
+int read_in_netD_file(struct cell **CELL_array, struct net **NET_array, char *netD_filename, int *max_cell_count_ptr)
 {
 	FILE *fp;
 	char line[256];
@@ -205,7 +206,7 @@ int read_in_netD_file(struct cell **CELL_array, struct net **NET_array, char *ne
 	fgets(line, sizeof(line), fp);
 	char *ptr;
 	int total_pin_number = strtol(line, &ptr, 10);
-
+	int max_cell_count = 0;
 	// A pointer to the current net, so that cells can be added to it.
 	struct net *incubent_net = NULL;
 	// loop through each line, extract information about the net connections
@@ -241,8 +242,11 @@ int read_in_netD_file(struct cell **CELL_array, struct net **NET_array, char *ne
 			insert_node(accessed_cell->nets, 0, incubent_net);
 			// Increase the net's cell counter
 			incubent_net->number_of_cells += 1;
+			if (incubent_net->number_of_cells >= max_cell_count)
+				max_cell_count = incubent_net->number_of_cells;
 		}
 	}
+	*max_cell_count_ptr = max_cell_count;
 	fclose(fp);
 	return total_pin_number;
 }

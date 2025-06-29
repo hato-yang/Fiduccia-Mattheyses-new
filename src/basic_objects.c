@@ -204,8 +204,8 @@ void initialize_partition(struct partition *partition, int max_nets, int which_p
 	struct dll **GAIN_array = calloc(2 * k * max_nets, sizeof(struct dll *)); // 2 * max_nets, 修改成 2 * k *  max_nets,
 	partition->GAIN_array = GAIN_array;
 	partition->GAIN_array_size = 2 * k * max_nets; // 2 * max_nets, 修改成 2 * k *  max_nets,
-	printf("max_nets(initialize_partition):%d\n", max_nets);
-	printf("GAIN_array_size:%d\n", partition->GAIN_array_size);
+	// printf("max_nets(initialize_partition):%d\n", max_nets);
+	// printf("GAIN_array_size:%d\n", partition->GAIN_array_size);
 	int i;
 	struct dll *list_of_cells_with_same_gain;
 	for (i = 0; i < 2 * k * max_nets; i++) // 2 * max_nets, 修改成 2 * k *  max_nets
@@ -233,7 +233,7 @@ void populate_partitions(struct condensed *information)
 	if (PARTITION_CELLS == GENETIC_ALGORITHM)
 		segregate_cells_with_GA(information);
 	else
-		segregate_cells_randomly(information);
+		segregate_cells_randomly(information); // segregate_cells_by_net_order(information); //
 
 	int current_cutstate = calculate_initial_cutstate(information->NET_array, information->NET_array_size, information);
 
@@ -253,4 +253,37 @@ void delete_partition(struct partition *undesired_partition)
 	}
 	free(undesired_partition->GAIN_array);
 	free(undesired_partition);
+}
+void populate_partitions_from_chromosome(struct condensed *information) // FM_REPEAT使用
+{
+	int i;
+	for (i = 0; i < information->CELL_array_size; i++)
+	{
+		struct cell *c = information->CELL_array[i];
+		int target_partition = information->FM_chromosome->gene_array[i];
+
+		c->which_partition = target_partition;
+		c->partition = information->access_[target_partition];
+
+		if (target_partition == PARTITION_A)
+		{
+			insert_node(information->partition_A->cells_in_partition, 0, c);
+			information->partition_A->total_partition_area += c->area;
+		}
+		else
+		{
+			insert_node(information->partition_B->cells_in_partition, 0, c);
+			information->partition_B->total_partition_area += c->area2;
+		}
+
+		// 更新 net 中 cell 的分區計數
+		struct node *net_node = c->nets->head->next;
+		while (net_node != c->nets->tail)
+		{
+			struct net *net = (struct net *)net_node->data_structure;
+			net->num_cells_in_[target_partition]++;
+			insert_node(net->free_cells, 0, c);
+			net_node = net_node->next;
+		}
+	}
 }

@@ -16,7 +16,6 @@ void import_data_and_run_algorithm(char *are_filename, char *netD_filename)
 	// Add useful information about partition sizes
 	information->desired_area = (int)(RATIO * information->total_area);
 	information->ratio = RATIO;
-
 	// Set the FM_chromosome to NULL so that GA proceeds normally
 	information->FM_chromosome = NULL;
 
@@ -37,7 +36,15 @@ void import_data_and_run_algorithm(char *are_filename, char *netD_filename)
 		initialize_two_partitions(information);
 
 		// Separate the cells into one of the two partitions
-		populate_partitions(information);
+		if (FM_REPEAT && information->FM_chromosome != NULL)
+		{
+			populate_partitions_from_chromosome(information);
+		}
+		else
+		{
+			populate_partitions(information);
+		}
+		// populate_partitions(information);
 		////////////////////print cell output
 		/*
 		FILE *Output = fopen("Output_initial", "w");
@@ -88,9 +95,11 @@ void import_data_and_run_algorithm(char *are_filename, char *netD_filename)
 
 		information->FM_chromosome = malloc(sizeof(struct chromosome));
 		initialize_chromosome(information->FM_chromosome, information);
-		printf("%d, %d\n", information->tolerance, information->tolerance1);
+		printf("%d, %d,%ld,%ld\n", information->tolerance, information->tolerance1, information->total_area, information->total_area2);
+
 		// Run the algorithm
 		// printf("%d, %d\n", information->partition_A->total_partition_area, information->partition_B->total_partition_area);
+
 		fiduccia_mattheyses_algorithm(information);
 
 		if (information->lowest_cutstate < lowest_global_cutsize)

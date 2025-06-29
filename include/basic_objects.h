@@ -66,3 +66,4 @@ void initialize_partition(struct partition *, int, int);
 void populate_partitions(struct condensed *);
 // void populate_partitions(struct partition*, struct partition*, struct net**, int, struct cell**, int, double, int, int);
 void delete_partition(struct partition *);
+void populate_partitions_from_chromosome(struct condensed *information); // FM_REPEAT使用
